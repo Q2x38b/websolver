@@ -76,15 +76,20 @@ function onFileChosen(e){
 
 /* Simple cropper: click-drag to draw rectangle */
 let cropImage = new Image();
+// Keep scale of drawn image to map back to original pixels
+state.cropScale = 1;
 function openCropper(dataUrl){
   cropImage = new Image();
   cropImage.onload = () => {
+    const overlay = $('.cropper');
+    // Ensure overlay is visible before measuring parent dimensions
+    overlay.classList.add('active');
     const canvas = $('#cropCanvas');
-    const ctx = canvas.getContext('2d');
-    const {width, height} = fitContain(cropImage.width, cropImage.height, canvas.parentElement.clientWidth, canvas.parentElement.clientHeight);
+    const parent = canvas.parentElement;
+    const {width, height, scale} = fitContain(cropImage.width, cropImage.height, parent.clientWidth, parent.clientHeight);
     canvas.width = width; canvas.height = height;
+    state.cropScale = scale;
     drawCropBase();
-    $('.cropper').classList.add('active');
     state.crop = { x: Math.round(width*0.1), y: Math.round(height*0.1), w: Math.round(width*0.8), h: Math.round(height*0.8), active:false };
     drawCrop();
   };
@@ -126,10 +131,11 @@ function cropPointerMove(ev){
   const pt = getCanvasPoint(ev);
   const dx = pt.x - state.crop.startX;
   const dy = pt.y - state.crop.startY;
-  state.crop.x = clamp(state.crop.orig.x + dx, 0, $('#cropCanvas').width - 10);
-  state.crop.y = clamp(state.crop.orig.y + dy, 0, $('#cropCanvas').height - 10);
-  state.crop.x = Math.max(0, Math.min(state.crop.x, $('#cropCanvas').width - state.crop.w));
-  state.crop.y = Math.max(0, Math.min(state.crop.y, $('#cropCanvas').height - state.crop.h));
+  const cv = $('#cropCanvas');
+  state.crop.x = clamp(state.crop.orig.x + dx, 0, cv.width - 10);
+  state.crop.y = clamp(state.crop.orig.y + dy, 0, cv.height - 10);
+  state.crop.x = Math.max(0, Math.min(state.crop.x, cv.width - state.crop.w));
+  state.crop.y = Math.max(0, Math.min(state.crop.y, cv.height - state.crop.h));
   drawCrop();
 }
 function cropPointerUp(){ state.crop.active = false; }
@@ -144,11 +150,16 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
 function confirmCropAndSolve(){
   const { x, y, w, h } = state.crop;
-  const src = $('#cropCanvas');
+  // Map crop rectangle back to original image coordinates for better quality
+  const scale = state.cropScale || 1;
+  const sx = Math.round(x / scale);
+  const sy = Math.round(y / scale);
+  const sw = Math.round(w / scale);
+  const sh = Math.round(h / scale);
   const out = document.createElement('canvas');
-  out.width = w; out.height = h;
+  out.width = sw; out.height = sh;
   const ctx = out.getContext('2d');
-  ctx.drawImage(src, x, y, w, h, 0, 0, w, h);
+  ctx.drawImage(cropImage, sx, sy, sw, sh, 0, 0, sw, sh);
   const dataUrl = out.toDataURL('image/png');
   $('.cropper').classList.remove('active');
   solveWithGemini(dataUrl);
