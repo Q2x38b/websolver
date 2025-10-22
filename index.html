@@ -1,1 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0c" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <title>Solver • iOS-like PWA</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app safe">
+    <header class="header">
+      <div class="segmented" role="tablist" aria-label="Mode selector">
+        <button class="active" data-mode="camera" aria-selected="true">📷 Camera</button>
+        <button data-mode="chat" aria-selected="false">💬 Chat</button>
+      </div>
+    </header>
 
+    <main class="pages">
+      <!-- Home Page -->
+      <section id="page-home" class="page active" aria-label="Home">
+        <!-- Camera View -->
+        <div id="cameraView" class="camera-wrap">
+          <video id="camera" autoplay playsinline muted></video>
+
+          <div class="subjects">
+            <div class="chip">History</div>
+            <div class="chip">Math</div>
+            <div class="chip active">General</div>
+            <div class="chip">Physics</div>
+            <div class="chip">Chemistry</div>
+            <div class="chip">Biology</div>
+            <div class="chip">Coding</div>
+            <div class="chip">Literature</div>
+          </div>
+
+          <div class="capture-controls">
+            <label class="icon-btn" title="Pick from gallery" aria-label="Pick from gallery">
+              <input id="gallery" type="file" accept="image/*" capture="environment" class="hidden" />
+              <span style="display:inline-block;width:100%;height:100%;line-height:52px;text-align:center">🖼️</span>
+            </label>
+            <button id="capture" class="btn-round" title="Capture" aria-label="Capture"></button>
+            <button class="icon-btn" title="Light" aria-label="Light">💡</button>
+          </div>
+        </div>
+
+        <!-- Chat View (hidden when in camera mode) -->
+        <div id="chatView" class="chat hidden">
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <div class="input-row">
+            <input id="chatInput" type="text" placeholder="Ask anything…" autocomplete="off" />
+            <button id="send">Send</button>
+          </div>
+        </div>
+
+        <!-- Cropper Overlay -->
+        <div class="cropper" aria-hidden="true">
+          <canvas id="cropCanvas"></canvas>
+          <div class="crop-actions">
+            <button id="cropCancel">Cancel</button>
+            <button id="cropConfirm">Use & Solve</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Explore/History Page -->
+      <section id="page-explore" class="page" aria-label="Explore">
+        <div id="history" class="history"></div>
+      </section>
+
+      <!-- Profile/Settings Page -->
+      <section id="page-profile" class="page" aria-label="Profile">
+        <div class="settings">
+          <div class="field">
+            <label for="apiKey">Gemini API Key</label>
+            <input id="apiKey" type="password" placeholder="Paste your API key" />
+          </div>
+          <div class="field">
+            <label for="model">Model</label>
+            <select id="model">
+              <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+              <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="saveSettings">Save</button>
+            <button id="clearHistory" class="danger">Clear History</button>
+          </div>
+          <small style="color:var(--muted)">Install to Home Screen for full-screen experience.</small>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar safe" role="tablist" aria-label="Bottom tabs">
+      <button class="active" data-tab="home" aria-selected="true">📷<span class="dot"></span><span>Home</span></button>
+      <button data-tab="explore">🧭<span class="dot"></span><span>Explore</span></button>
+      <button data-tab="profile">🙂<span class="dot"></span><span>Profile</span></button>
+    </nav>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
